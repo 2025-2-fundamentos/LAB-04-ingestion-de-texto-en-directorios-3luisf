@@ -71,3 +71,44 @@ def pregunta_01():
 
 
     """
+    import os
+    import pandas as pd
+    import zipfile
+
+    # Definir rutas con "files" como carpeta base
+    files_dir = "files"
+    input_dir = os.path.join(files_dir, "input")
+    output_dir = os.path.join(files_dir, "output")
+
+    # Crear carpeta "files" si no existe
+    if not os.path.exists(files_dir):
+        os.makedirs(files_dir)
+
+    # Descompresión del archivo input.zip
+    zip_path = os.path.join(files_dir, "input.zip")
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(files_dir)
+
+    # Crear la carpeta output si no existe
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    for dataset_type in ["train", "test"]:
+        data = {"phrase": [], "target": []}  # ← ya usamos 'target'
+        for sentiment in ["negative", "positive", "neutral"]:
+            dir_path = os.path.join(input_dir, dataset_type, sentiment)
+            for filename in os.listdir(dir_path):
+                if filename.endswith(".txt"):
+                    file_path = os.path.join(dir_path, filename)
+                    with open(file_path, "r", encoding="utf-8") as file:
+                        phrase = file.read().strip()
+                        data["phrase"].append(phrase)
+                        data["target"].append(sentiment)
+
+        df = pd.DataFrame(data)
+        output_file = os.path.join(output_dir, f"{dataset_type}_dataset.csv")
+        df.to_csv(output_file, index=False)
+
+    return None
+
+pregunta_01()
